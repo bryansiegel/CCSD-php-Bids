@@ -1,0 +1,4 @@
+Bid Name
+Advertisement for Bids
+has many Bids
+Bid Tabulation Sheet

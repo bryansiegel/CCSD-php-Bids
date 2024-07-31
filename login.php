@@ -1,49 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+require 'db.php';
+session_start();
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-</head>
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-<body>
+    $sql = "SELECT id, password FROM users WHERE username = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->store_result();
+    $stmt->bind_result($id, $hashed_password);
+    $stmt->fetch();
 
-  <div class="container">
+    if ($stmt->num_rows > 0 && password_verify($password, $hashed_password)) {
+        $_SESSION['user_id'] = $id;
+        $_SESSION['username'] = $username;
+        header("Location: welcome.php");
+    } else {
+        echo "Invalid username or password";
+    }
+}
+?>
+
+<?php include('includes/head.php'); ?>
+
+<div class="container">
   <div class="row justify-content-center align-items-center">
   <div class="col-md-6 my-auto">
 
       <h1 class="text-center pt-5 mt-5">Login</h1>
-      <form>
-        <!-- Email input -->
-        <div data-mdb-input-init class="form-outline mb-4">
-          <input type="email" id="form2Example1" class="form-control" />
-          <label class="form-label" for="form2Example1">Email address</label>
+    <form method="POST" action="login.php">
+      <div class="form-group pt-4">
+        <label for="username">Username:</label>
+        <input class="form-control" type="text" name="username" required>
         </div>
 
-        <!-- Password input -->
-        <div data-mdb-input-init class="form-outline mb-4">
-          <input type="password" id="form2Example2" class="form-control" />
-          <label class="form-label" for="form2Example2">Password</label>
+        <div class="form-group pt-4">
+        <label for="password">Password:</label>
+        <input class="form-control" type="password" name="password" required>
         </div>
 
-        <!-- Submit button -->
-        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">Sign
-          in</button>
 
+        <div class="form-group pt-4">
+        <button class="btn btn-primary"type="submit">Login</button>
+        </div>
       </form>
     </div>
     </div>
-  </div>
+    </div>
 
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-    crossorigin="anonymous"></script>
-</body>
-
-
-</html>
+<?php include('includes/footer.php'); ?>
